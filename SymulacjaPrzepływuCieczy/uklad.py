@@ -5,7 +5,7 @@ from grzalka import Grzalka
 
 class Uklad:
     def __init__(self):
-        # === STAŁE GEOMETRYCZNE ===
+        # STAŁE GEOMETRYCZNE
         self.X_AXIS_LEFT = 140
         self.X_AXIS_RIGHT = 760
         self.Y_Z2 = 50
@@ -19,7 +19,7 @@ class Uklad:
         # Listy do łatwego rysowania
         self.lista_zbiornikow = []
         self.lista_rur = []
-        self.lista_urzadzen = [] # Pompy, grzałki
+        self.lista_urzadzen = [] 
 
         # Inicjalizacja komponentów
         self._utworz_zbiorniki()
@@ -27,23 +27,17 @@ class Uklad:
         self._utworz_rury()
 
     def _utworz_zbiorniki(self):
-        # Z1: Bufor
         self.z1 = Zbiornik(self.X_AXIS_LEFT - 90, 500, 180, 120, "Z1: Bufor", pojemnosc=300.0)
         self.z1.aktualna_ilosc = 200.0
         self.z1.aktualizuj_poziom()
 
-        # Z2: Dozownik
         self.z2 = Zbiornik(self.X_AXIS_LEFT - 90, self.Y_Z2, 180, 120, "Z2: Dozownik")
-
-        # Z3: Reaktor
         self.z3 = Zbiornik(self.X_AXIS_RIGHT - 110, self.Y_Z3, 220, 200, "Z3: Reaktor", pojemnosc=400.0)
 
-        # Z4 i Z5: Chłodnice
         OFFSET = 150
         self.z4 = Zbiornik(self.X_AXIS_RIGHT - OFFSET - 60, self.Y_Z4_Z5, 120, 120, "Z4: Chłodnica 1")
         self.z5 = Zbiornik(self.X_AXIS_RIGHT + OFFSET - 60, self.Y_Z4_Z5, 120, 120, "Z5: Chłodnica 2")
 
-        # Lista zbiorników
         self.lista_zbiornikow = [self.z1, self.z2, self.z3, self.z4, self.z5]
 
     def _utworz_urzadzenia(self):
@@ -51,7 +45,6 @@ class Uklad:
         self.p2 = Pompa(self.X_AXIS_RIGHT, self.Y_P2)
         self.grzalka = Grzalka(self.X_AXIS_RIGHT - 60, self.Y_Z3 + 150, 120, 30)
 
-        # Lista urządzeń
         self.lista_urzadzen = [self.p1, self.p2, self.grzalka]
 
     def _utworz_rury(self):
@@ -92,6 +85,9 @@ class Uklad:
         pts_r7 = [(x_z5, y_out), (x_z5, self.Y_BOTTOM_RAIL), (x_z4, self.Y_BOTTOM_RAIL)]
         self.rura7 = Rura(pts_r7)
 
-        # Lista rur
         self.lista_rur = [self.rura1, self.rura2, self.rura3, self.rura4, 
                           self.rura5a, self.rura5b, self.rura6, self.rura7]
+
+    @property
+    def wszystkie_elementy(self):
+        return self.lista_rur + self.lista_zbiornikow + self.lista_urzadzen

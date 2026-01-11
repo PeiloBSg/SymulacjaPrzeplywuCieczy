@@ -1,10 +1,10 @@
 ﻿class Sterownik:
     def __init__(self, uklad_fizyczny):
         self.uklad = uklad_fizyczny
-        self.tempo = 0.8  # Szybkość symulacji
+        self.tempo = 0.8
 
     def wykonaj_cykl(self):
-        u = self.uklad # Alias dla wygody
+        u = self.uklad
         
         # 1. Z1 -> Z2 (Transfer)
         if not u.z1.czy_pusty() and not u.z2.czy_pelny():
@@ -53,7 +53,6 @@
                 r5a = False
                 r5b = False
 
-                # Rozdział na dwie chłodnice
                 if not u.z4.czy_pelny():
                     u.z4.dodaj_ciecz(polowa, temp_goraca)
                     r5a = True
@@ -91,20 +90,24 @@
         u.z2.schlodz(0.02)
 
     def _obsluz_powrot(self, zbiornik, rura_powrotna, rura_kolektor=None):
-
-        # Warunek: Jest woda ORAZ jest już wystarczająco schłodzona (np. < 30 st)
+        """Metoda pomocnicza obsługująca powrót cieczy (DRY principle)."""
         if zbiornik.poziom > 0.05 and zbiornik.temperatura < 30.0:
-            zbiornik.schlodz(0.6) # Aktywne chłodzenie w ruchu
+            zbiornik.schlodz(0.6)
             temp = zbiornik.temperatura
             ilosc = zbiornik.usun_ciecz(self.tempo * 0.6)
-            
-            # Wlewanie z powrotem do bufora Z1
             self.uklad.z1.dodaj_ciecz(ilosc, temp)
             
             rura_powrotna.ustaw_przeplyw(True)
             if rura_kolektor:
                 rura_kolektor.ustaw_przeplyw(True)
         else:
-            # Jeśli woda stoi, to tylko stygnie
             zbiornik.schlodz(0.6)
             rura_powrotna.ustaw_przeplyw(False)
+
+    def zatrzymaj_wszystko(self):
+        u = self.uklad
+        u.p1.wylacz()
+        u.p2.wylacz()
+        u.grzalka.ustaw_stan(False)
+        for r in u.lista_rur:
+            r.ustaw_przeplyw(False)

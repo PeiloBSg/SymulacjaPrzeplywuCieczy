@@ -1,7 +1,6 @@
 ﻿import sys
 from PyQt5.QtWidgets import QApplication
 
-# Importujemy naszą główną klasę okna z pliku symulacja_ui.py
 from symulacja_ui import SymulacjaProcesu
 
 def main():
