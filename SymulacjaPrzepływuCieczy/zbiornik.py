@@ -14,17 +14,41 @@ class Zbiornik:
         self.poziom = 0.0
         self.temperatura = 20.0
 
-    def dodaj_ciecz(self, ilosc: float) -> float:
+    def dodaj_ciecz(self, ilosc: float, temp_dolewana: float = 20.0) -> float:
+        """
+        Dodaje ciecz do zbiornika i oblicza nową temperaturę mieszaniny.
+        """
         wolne = self.pojemnosc - self.aktualna_ilosc
         dodano = min(ilosc, wolne)
-        self.aktualna_ilosc += dodano
-        self.aktualizuj_poziom()
+
+        # Logika mieszania temperatur (średnia ważona)
+        if dodano > 0.0001:
+            masa_obecna = self.aktualna_ilosc
+            masa_dodana = dodano
+            
+            energia_obecna = masa_obecna * self.temperatura
+            energia_dodana = masa_dodana * temp_dolewana
+            
+            calkowita_masa = masa_obecna + masa_dodana
+            
+            # Nowa temperatura to całkowita energia podzielona przez całkowitą masę
+            if calkowita_masa > 0:
+                self.temperatura = (energia_obecna + energia_dodana) / calkowita_masa
+
+            self.aktualna_ilosc += dodano
+            self.aktualizuj_poziom()
+            
         return dodano
 
     def usun_ciecz(self, ilosc: float) -> float:
         usunieto = min(ilosc, self.aktualna_ilosc)
         self.aktualna_ilosc -= usunieto
         self.aktualizuj_poziom()
+        
+        # Jeśli zbiornik jest pusty, resetujemy temperaturę do otoczenia (opcjonalne)
+        if self.aktualna_ilosc <= 0.1:
+            self.temperatura = 20.0
+            
         return usunieto
 
     def aktualizuj_poziom(self):
@@ -42,7 +66,6 @@ class Zbiornik:
     def punkt_lewo(self): return (self.x, self.y + self.height / 2)
     def punkt_prawo(self): return (self.x + self.width, self.y + self.height / 2)
     
-    # Punkty specjalne (np. wejście od góry, ale przesunięte)
     def punkt_gora_lewo(self): return (self.x + 20, self.y)
     def punkt_gora_prawo(self): return (self.x + self.width - 20, self.y)
 
@@ -50,10 +73,12 @@ class Zbiornik:
         if self.aktualna_ilosc > 0: self.temperatura = min(100.0, self.temperatura + moc)
             
     def schlodz(self, moc: float):
+        # Chłodzenie nie może spaść poniżej temperatury otoczenia (np. 20 st)
         self.temperatura = max(20.0, self.temperatura - moc)
 
     def get_kolor_cieczy(self):
         # Od Niebieskiego (zimna) do Czerwonego (gorąca)
+        # Zakładamy zakres wizualizacji 20C - 100C
         ratio = (self.temperatura - 20) / 80.0
         ratio = max(0.0, min(1.0, ratio))
         r = int(0 + ratio * 255)

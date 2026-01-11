@@ -9,15 +9,18 @@
         Ta metoda wykonuje jeden krok logiki automatyki.
         Jest wywoływana przez Timer z głównego okna.
         """
-        u = self.uklad # Alias dla wygody, żeby nie pisać self.uklad.z1...
+        u = self.uklad # Alias dla wygody
         
         # 1. Z1 -> Z2 (Transfer)
         if not u.z1.czy_pusty() and not u.z2.czy_pelny():
             u.p1.wlacz() 
             # Sprawdzenie fizyczne pompy (czy włącznik jest ON)
             if u.p1.is_running:
+                # Pobieramy temperaturę ze źródła
+                temp_zrodla = u.z1.temperatura
                 ilosc = u.z1.usun_ciecz(self.tempo)
-                u.z2.dodaj_ciecz(ilosc)
+                # Przekazujemy ilość ORAZ temperaturę do celu
+                u.z2.dodaj_ciecz(ilosc, temp_zrodla)
                 u.rura1.ustaw_przeplyw(True)
             else:
                 u.rura1.ustaw_przeplyw(False)
@@ -27,8 +30,9 @@
 
         # 2. Z2 -> Z3 (Dozowanie)
         if u.z2.poziom > 0.05 and not u.z3.czy_pelny():
+            temp_zrodla = u.z2.temperatura
             ilosc = u.z2.usun_ciecz(self.tempo * 0.8)
-            u.z3.dodaj_ciecz(ilosc)
+            u.z3.dodaj_ciecz(ilosc, temp_zrodla)
             u.rura2.ustaw_przeplyw(True)
         else:
             u.rura2.ustaw_przeplyw(False)
@@ -46,12 +50,15 @@
             u.z3.schlodz(0.1)
 
         # 4. Z3 -> P2 -> Z4/Z5 (Spust do chłodnic)
+        # Warunki spustu: gorąca ciecz LUB prawie pełny zbiornik
         gotowy_do_spustu = (u.z3.temperatura > 55.0 or u.z3.poziom > 0.85)
         miejsce_w_chlodnicach = (not u.z4.czy_pelny() or not u.z5.czy_pelny())
 
         if gotowy_do_spustu and miejsce_w_chlodnicach and u.z3.aktualna_ilosc > 0:
             u.p2.wlacz()
             if u.p2.is_running:
+                # To najważniejszy moment - przekazujemy gorącą ciecz
+                temp_goraca = u.z3.temperatura
                 ilosc = u.z3.usun_ciecz(self.tempo * 2.0)
                 polowa = ilosc / 2.0
                 r5a = False
@@ -59,16 +66,18 @@
 
                 # Rozdział na dwie chłodnice
                 if not u.z4.czy_pelny():
-                    u.z4.dodaj_ciecz(polowa)
+                    u.z4.dodaj_ciecz(polowa, temp_goraca)
                     r5a = True
                 else:
-                    u.z5.dodaj_ciecz(polowa)
+                    # Jak Z4 pełny, całość idzie do Z5
+                    u.z5.dodaj_ciecz(polowa, temp_goraca)
 
                 if not u.z5.czy_pelny():
-                    u.z5.dodaj_ciecz(polowa)
+                    u.z5.dodaj_ciecz(polowa, temp_goraca)
                     r5b = True
                 else:
-                    u.z4.dodaj_ciecz(polowa)
+                    # Jak Z5 pełny, całość idzie do Z4
+                    u.z4.dodaj_ciecz(polowa, temp_goraca)
 
                 u.rura3.ustaw_przeplyw(True)
                 u.rura4.ustaw_przeplyw(True)
@@ -86,26 +95,30 @@
             u.rura5a.ustaw_przeplyw(False)
             u.rura5b.ustaw_przeplyw(False)
 
-        # 5. Powrót Z4/Z5 -> Z1
+        # 5. Powrót Z4/Z5 -> Z1 (Recyrkulacja)
         # Z4
-        if u.z4.poziom > 0.05:
-            u.z4.schlodz(0.6)
+        if u.z4.poziom > 0.05 and u.z4.temperatura < 30.0:
+            u.z4.schlodz(0.6) # Aktywne chłodzenie w chłodnicy
+            temp_z4 = u.z4.temperatura
             ilosc = u.z4.usun_ciecz(self.tempo * 0.6)
-            u.z1.dodaj_ciecz(ilosc)
+            u.z1.dodaj_ciecz(ilosc, temp_z4)
             u.rura6.ustaw_przeplyw(True)
         else:
+            u.z4.schlodz(0.6)
             u.rura6.ustaw_przeplyw(False)
 
         # Z5
-        if u.z5.poziom > 0.05:
-            u.z5.schlodz(0.6)
+        if u.z5.poziom > 0.05 and u.z5.temperatura < 30.0:
+            u.z5.schlodz(0.6) # Aktywne chłodzenie w chłodnicy
+            temp_z5 = u.z5.temperatura
             ilosc = u.z5.usun_ciecz(self.tempo * 0.6)
-            u.z1.dodaj_ciecz(ilosc)
+            u.z1.dodaj_ciecz(ilosc, temp_z5)
             u.rura7.ustaw_przeplyw(True)
-            u.rura6.ustaw_przeplyw(True) # Wspólny kolektor
+            u.rura6.ustaw_przeplyw(True) # Wspólny kolektor powrotny
         else:
+            u.z5.schlodz(0.6)
             u.rura7.ustaw_przeplyw(False)
 
-        # Fizyka otoczenia (naturalne chłodzenie)
+        # Fizyka otoczenia (naturalne powolne stygnięcie w rurach/zbiornikach pasywnych)
         u.z1.schlodz(0.02)
         u.z2.schlodz(0.02)
