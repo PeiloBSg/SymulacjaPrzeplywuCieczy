@@ -7,7 +7,7 @@ from PyQt5.QtGui import QPainter
 from uklad import Uklad
 from sterownik import Sterownik
 from statystyki_ui import OknoStatystyk
-from obsluga_ui import ObslugaUI  # <--- NOWY IMPORT
+from obsluga_ui import ObslugaUI
 
 class SymulacjaProcesu(QWidget):
     def __init__(self):
@@ -22,12 +22,12 @@ class SymulacjaProcesu(QWidget):
         # 2. KONTROLER
         self.sterownik = Sterownik(self.uklad)
 
-        # 3. WIDOK (Okna pomocnicze)
+        # 3. WIDOK
         self.okno_statystyk = OknoStatystyk(self)
 
-        # 4. OBSŁUGA UI (Delegacja zadań UI do innej klasy)
+        # 4. UI MANAGER (Tworzenie i wygląd)
         self.ui_manager = ObslugaUI(self)
-        self.ui_manager.init_ui()  # Tworzenie przycisków
+        self.ui_manager.init_ui()
 
         # Timer
         self.timer = QTimer()
@@ -48,18 +48,16 @@ class SymulacjaProcesu(QWidget):
         self.running = not self.running
         if self.running:
             self.timer.start(30)
-            self.btn_start.setStyleSheet("background-color: #388E3C; border: 2px solid #1B5E20;")
-            self.lbl_status.setText("STAN: PRACA AUTOMATYCZNA")
+            self.ui_manager.ustaw_wyglad_aktywny()
         else:
+            # Logika (zatrzymanie fizyki)
             self.timer.stop()
-            # Bezpieczne zatrzymanie
             self.uklad.p1.wylacz()
             self.uklad.p2.wylacz()
             self.uklad.grzalka.ustaw_stan(False)
             for r in self.uklad.lista_rur: r.ustaw_przeplyw(False)
             
-            self.btn_start.setStyleSheet("background-color: #d32f2f; border: 2px solid #b71c1c;")
-            self.lbl_status.setText("STAN: ZATRZYMANY")
+            self.ui_manager.ustaw_wyglad_nieaktywny()
             self.update()
 
     def obsluga_timera(self):
