@@ -13,12 +13,12 @@ class ObslugaUI:
         self.okno.btn_start = QPushButton("START / STOP", self.okno)
         self.okno.btn_start.setGeometry(380, 690, 150, 40)
         
-        # 2. Najpierw tworzymy Etykietę STATUS (To musi być PRZED wywołaniem ustaw_wyglad...)
+        # 2. Najpierw tworzymy Etykietę STATUS
         self.okno.lbl_status = QLabel("STAN: OCZEKIWANIE", self.okno)
         self.okno.lbl_status.setGeometry(550, 690, 300, 40)
         self.okno.lbl_status.setStyleSheet("font-size: 14px; color: #aaa;")
 
-        # 3. Teraz bezpiecznie ustawiamy domyślny wygląd (bo oba obiekty już istnieją)
+        # 3. Teraz bezpiecznie ustawiamy domyślny wygląd
         self.ustaw_wyglad_nieaktywny()
         
         # Podpinamy kliknięcie
@@ -56,11 +56,14 @@ class ObslugaUI:
             self.toggle_statystyki()
 
     def mousePressEvent(self, event):
-        # Sprawdzanie kliknięć w elementy graficzne
-        uklad = self.okno.uklad
-        zmiana1 = uklad.p1.sprawdz_klikniecie(event.x(), event.y())
-        zmiana2 = uklad.p2.sprawdz_klikniecie(event.x(), event.y())
-        zmiana3 = uklad.grzalka.sprawdz_klikniecie(event.x(), event.y())
+        urzadzenia = self.okno.uklad.lista_urzadzen
+        wymagane_odswiezenie = False
+
+        for urzadzenie in urzadzenia:
+
+            if hasattr(urzadzenie, 'sprawdz_klikniecie'):
+                if urzadzenie.sprawdz_klikniecie(event.x(), event.y()):
+                    wymagane_odswiezenie = True
         
-        if zmiana1 or zmiana2 or zmiana3:
+        if wymagane_odswiezenie:
             self.okno.update()

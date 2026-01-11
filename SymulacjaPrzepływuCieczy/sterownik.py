@@ -1,25 +1,17 @@
 ﻿class Sterownik:
     def __init__(self, uklad_fizyczny):
-        # Sterownik musi mieć dostęp do sprzętu (pomp, zaworów, zbiorników)
         self.uklad = uklad_fizyczny
         self.tempo = 0.8  # Szybkość symulacji
 
     def wykonaj_cykl(self):
-        """
-        Ta metoda wykonuje jeden krok logiki automatyki.
-        Jest wywoływana przez Timer z głównego okna.
-        """
         u = self.uklad # Alias dla wygody
         
         # 1. Z1 -> Z2 (Transfer)
         if not u.z1.czy_pusty() and not u.z2.czy_pelny():
             u.p1.wlacz() 
-            # Sprawdzenie fizyczne pompy (czy włącznik jest ON)
             if u.p1.is_running:
-                # Pobieramy temperaturę ze źródła
                 temp_zrodla = u.z1.temperatura
                 ilosc = u.z1.usun_ciecz(self.tempo)
-                # Przekazujemy ilość ORAZ temperaturę do celu
                 u.z2.dodaj_ciecz(ilosc, temp_zrodla)
                 u.rura1.ustaw_przeplyw(True)
             else:
@@ -40,7 +32,6 @@
         # 3. Reaktor Z3 (Grzanie / Reakcja)
         if u.z3.aktualna_ilosc > 10:
             u.grzalka.ustaw_stan(True) 
-            # Sprawdzenie fizyczne grzałki (bezpiecznik)
             if u.grzalka.is_active:
                 u.z3.ogrzej(0.4)
             else:
@@ -50,14 +41,12 @@
             u.z3.schlodz(0.1)
 
         # 4. Z3 -> P2 -> Z4/Z5 (Spust do chłodnic)
-        # Warunki spustu: gorąca ciecz LUB prawie pełny zbiornik
         gotowy_do_spustu = (u.z3.temperatura > 55.0 or u.z3.poziom > 0.85)
         miejsce_w_chlodnicach = (not u.z4.czy_pelny() or not u.z5.czy_pelny())
 
         if gotowy_do_spustu and miejsce_w_chlodnicach and u.z3.aktualna_ilosc > 0:
             u.p2.wlacz()
             if u.p2.is_running:
-                # To najważniejszy moment - przekazujemy gorącą ciecz
                 temp_goraca = u.z3.temperatura
                 ilosc = u.z3.usun_ciecz(self.tempo * 2.0)
                 polowa = ilosc / 2.0
@@ -69,14 +58,12 @@
                     u.z4.dodaj_ciecz(polowa, temp_goraca)
                     r5a = True
                 else:
-                    # Jak Z4 pełny, całość idzie do Z5
                     u.z5.dodaj_ciecz(polowa, temp_goraca)
 
                 if not u.z5.czy_pelny():
                     u.z5.dodaj_ciecz(polowa, temp_goraca)
                     r5b = True
                 else:
-                    # Jak Z5 pełny, całość idzie do Z4
                     u.z4.dodaj_ciecz(polowa, temp_goraca)
 
                 u.rura3.ustaw_przeplyw(True)
@@ -96,29 +83,28 @@
             u.rura5b.ustaw_przeplyw(False)
 
         # 5. Powrót Z4/Z5 -> Z1 (Recyrkulacja)
-        # Z4
-        if u.z4.poziom > 0.05 and u.z4.temperatura < 30.0:
-            u.z4.schlodz(0.6) # Aktywne chłodzenie w chłodnicy
-            temp_z4 = u.z4.temperatura
-            ilosc = u.z4.usun_ciecz(self.tempo * 0.6)
-            u.z1.dodaj_ciecz(ilosc, temp_z4)
-            u.rura6.ustaw_przeplyw(True)
-        else:
-            u.z4.schlodz(0.6)
-            u.rura6.ustaw_przeplyw(False)
+        self._obsluz_powrot(u.z4, u.rura6)
+        self._obsluz_powrot(u.z5, u.rura7, u.rura6)
 
-        # Z5
-        if u.z5.poziom > 0.05 and u.z5.temperatura < 30.0:
-            u.z5.schlodz(0.6) # Aktywne chłodzenie w chłodnicy
-            temp_z5 = u.z5.temperatura
-            ilosc = u.z5.usun_ciecz(self.tempo * 0.6)
-            u.z1.dodaj_ciecz(ilosc, temp_z5)
-            u.rura7.ustaw_przeplyw(True)
-            u.rura6.ustaw_przeplyw(True) # Wspólny kolektor powrotny
-        else:
-            u.z5.schlodz(0.6)
-            u.rura7.ustaw_przeplyw(False)
-
-        # Fizyka otoczenia (naturalne powolne stygnięcie w rurach/zbiornikach pasywnych)
+        # Fizyka otoczenia
         u.z1.schlodz(0.02)
         u.z2.schlodz(0.02)
+
+    def _obsluz_powrot(self, zbiornik, rura_powrotna, rura_kolektor=None):
+
+        # Warunek: Jest woda ORAZ jest już wystarczająco schłodzona (np. < 30 st)
+        if zbiornik.poziom > 0.05 and zbiornik.temperatura < 30.0:
+            zbiornik.schlodz(0.6) # Aktywne chłodzenie w ruchu
+            temp = zbiornik.temperatura
+            ilosc = zbiornik.usun_ciecz(self.tempo * 0.6)
+            
+            # Wlewanie z powrotem do bufora Z1
+            self.uklad.z1.dodaj_ciecz(ilosc, temp)
+            
+            rura_powrotna.ustaw_przeplyw(True)
+            if rura_kolektor:
+                rura_kolektor.ustaw_przeplyw(True)
+        else:
+            # Jeśli woda stoi, to tylko stygnie
+            zbiornik.schlodz(0.6)
+            rura_powrotna.ustaw_przeplyw(False)
