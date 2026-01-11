@@ -43,7 +43,7 @@ class Uklad:
         self.z4 = Zbiornik(self.X_AXIS_RIGHT - OFFSET - 60, self.Y_Z4_Z5, 120, 120, "Z4: Chłodnica 1")
         self.z5 = Zbiornik(self.X_AXIS_RIGHT + OFFSET - 60, self.Y_Z4_Z5, 120, 120, "Z5: Chłodnica 2")
 
-        # Dodajemy do listy
+        # Lista zbiorników
         self.lista_zbiornikow = [self.z1, self.z2, self.z3, self.z4, self.z5]
 
     def _utworz_urzadzenia(self):
@@ -51,7 +51,7 @@ class Uklad:
         self.p2 = Pompa(self.X_AXIS_RIGHT, self.Y_P2)
         self.grzalka = Grzalka(self.X_AXIS_RIGHT - 60, self.Y_Z3 + 150, 120, 30)
 
-        # Lista pomocnicza (opcjonalnie do rysowania pętli)
+        # Lista urządzeń
         self.lista_urzadzen = [self.p1, self.p2, self.grzalka]
 
     def _utworz_rury(self):

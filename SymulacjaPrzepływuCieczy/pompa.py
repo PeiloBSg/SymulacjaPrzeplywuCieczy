@@ -9,10 +9,9 @@ class Pompa:
         self.is_running = False
         self.angle = 0  # do animacji obrotu
         
-        # --- NOWOŚĆ: Logika włącznika ---
+        # Logika włącznika
         self.prad_wlaczony = True # Czy włącznik jest na ON (domyślnie tak)
-        # Definiujemy obszar przycisku (np. mały kwadrat w prawym górnym rogu pompy)
-        # x + 10, y - 30 to pozycja względem środka pompy
+
         self.rect_wlacznik = QRectF(self.x + 8, self.y - 30, 16, 16)
 
     def wlacz(self):
@@ -26,10 +25,7 @@ class Pompa:
         self.is_running = False
 
     def sprawdz_klikniecie(self, myszka_x, myszka_y):
-        """
-        Metoda sprawdza, czy kliknięto w obszar włącznika tej pompy.
-        Zwraca True, jeśli nastąpiła zmiana, co pozwoli odświeżyć ekran.
-        """
+
         if self.rect_wlacznik.contains(myszka_x, myszka_y):
             self.prad_wlaczony = not self.prad_wlaczony
             # Jeśli wyłączamy prąd, pompa natychmiast staje
@@ -65,15 +61,14 @@ class Pompa:
         painter.setPen(Qt.white)
         painter.drawText(int(self.x - 15), int(self.y + self.r + 15), "POMPA")
 
-        # --- NOWOŚĆ: Rysowanie włącznika ---
-        # Kolor włącznika: Zielony (ON) / Czerwony (OFF)
+        # Rysowanie włącznika
         kolor_wlacznika = QColor(0, 200, 0) if self.prad_wlaczony else QColor(200, 0, 0)
         
         painter.setPen(QPen(Qt.white, 1))
         painter.setBrush(QBrush(kolor_wlacznika))
         painter.drawRect(self.rect_wlacznik)
         
-        # Opcjonalnie: litera "S" na włączniku
+        # Litera "S" na włączniku
         painter.setPen(Qt.black)
         painter.setFont(painter.font()) # Reset czcionki
         painter.drawText(self.rect_wlacznik, Qt.AlignCenter, "I/O")

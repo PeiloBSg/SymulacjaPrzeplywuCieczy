@@ -3,10 +3,9 @@ from PyQt5.QtGui import QPainter, QColor, QPen, QPainterPath
 
 class Rura:
     def __init__(self, punkty, grubosc=8):
-        # punkty to lista krotek [(x1,y1), (x2,y2), ...]
         self.punkty = [QPointF(float(p[0]), float(p[1])) for p in punkty]
         self.grubosc = grubosc
-        self.kolor_rury = QColor(100, 100, 100) # Szary metal
+        self.kolor_rury = QColor(100, 100, 100)
         self.kolor_cieczy = QColor(0, 180, 255)
         self.czy_plynie = False
 

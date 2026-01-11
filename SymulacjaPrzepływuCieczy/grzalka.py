@@ -9,28 +9,20 @@ class Grzalka:
         self.h = height
         self.is_active = False # Stan faktyczny (czy grzeje)
         
-        # --- NOWOŚĆ: Logika włącznika ---
+        # Logika włącznika
         self.prad_wlaczony = True # Stan włącznika (czy jest zasilanie)
-        
-        # Przycisk umieszczamy np. w prawym górnym rogu obszaru grzałki (lub tuż nad nią)
-        # x + w - 20 (prawa strona), y - 25 (trochę wyżej)
+
         self.rect_wlacznik = QRectF(self.x + self.w - 20, self.y - 25, 20, 20)
 
     def ustaw_stan(self, stan: bool):
-        """
-        Automatyka próbuje włączyć (stan=True) lub wyłączyć (stan=False).
-        Ale jeśli włącznik (prad_wlaczony) jest na False, to grzałka i tak nie ruszy.
-        """
+
         if self.prad_wlaczony:
             self.is_active = stan
         else:
             self.is_active = False
 
     def sprawdz_klikniecie(self, myszka_x, myszka_y):
-        """
-        Sprawdza, czy kliknięto przycisk zasilania grzałki.
-        Zwraca True, jeśli zmieniono stan (wymaga odświeżenia ekranu).
-        """
+
         if self.rect_wlacznik.contains(myszka_x, myszka_y):
             self.prad_wlaczony = not self.prad_wlaczony
             # Jeśli odcinamy prąd, natychmiast przestaje grzać
@@ -68,7 +60,7 @@ class Grzalka:
         state_txt = "ON" if self.is_active else "OFF"
         painter.drawText(int(self.x), int(self.y - 5), f"GRZAŁKA: {state_txt}")
 
-        # --- NOWOŚĆ: Rysowanie przycisku zasilania ---
+        # Rysowanie przycisku zasilania
         kolor_wlacznika = QColor(0, 200, 0) if self.prad_wlaczony else QColor(200, 0, 0)
         
         painter.setPen(QPen(Qt.white, 1))

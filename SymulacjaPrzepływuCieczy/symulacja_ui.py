@@ -34,7 +34,7 @@ class SymulacjaProcesu(QWidget):
         self.timer.timeout.connect(self.obsluga_timera)
         self.running = False
 
-    # --- Przekazywanie zdarzeń do managera UI ---
+    # Przekazywanie zdarzeń do managera UI
     def keyPressEvent(self, event):
         self.ui_manager.keyPressEvent(event)
         super().keyPressEvent(event)
@@ -42,7 +42,6 @@ class SymulacjaProcesu(QWidget):
     def mousePressEvent(self, event):
         self.ui_manager.mousePressEvent(event)
         super().mousePressEvent(event)
-    # --------------------------------------------
 
     def toggle_process(self):
         self.running = not self.running
@@ -72,7 +71,4 @@ class SymulacjaProcesu(QWidget):
         
         for r in self.uklad.lista_rur: r.draw(p)
         for z in self.uklad.lista_zbiornikow: z.draw(p)
-        
-        self.uklad.grzalka.draw(p)
-        self.uklad.p1.draw(p)
-        self.uklad.p2.draw(p)
+        for u in self.uklad.lista_urzadzen: u.draw(p)

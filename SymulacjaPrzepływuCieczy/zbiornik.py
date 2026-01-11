@@ -15,9 +15,7 @@ class Zbiornik:
         self.temperatura = 20.0
 
     def dodaj_ciecz(self, ilosc: float, temp_dolewana: float = 20.0) -> float:
-        """
-        Dodaje ciecz do zbiornika i oblicza nową temperaturę mieszaniny.
-        """
+
         wolne = self.pojemnosc - self.aktualna_ilosc
         dodano = min(ilosc, wolne)
 
