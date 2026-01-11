@@ -25,7 +25,9 @@
     <Compile Include="main.py" />
     <Compile Include="pompa.py" />
     <Compile Include="rura.py" />
+    <Compile Include="sterownik.py" />
     <Compile Include="symulacja_ui.py" />
+    <Compile Include="uklad.py" />
     <Compile Include="zbiornik.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
