@@ -98,7 +98,3 @@ class Zbiornik:
         painter.setPen(Qt.white)
         # Nazwa nad zbiornikiem
         painter.drawText(int(self.x), int(self.y - 8), self.nazwa)
-        # Parametry pod zbiornikiem (centrowane)
-        #status = f"{int(self.aktualna_ilosc)}L | {int(self.temperatura)}°C"
-        #rect_text = QRectF(self.x, self.y + self.height + 5, self.width, 20)
-        #painter.drawText(rect_text, Qt.AlignCenter, status)

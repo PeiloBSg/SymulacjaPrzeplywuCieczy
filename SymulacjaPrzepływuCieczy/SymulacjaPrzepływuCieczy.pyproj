@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="grzalka.py" />
     <Compile Include="main.py" />
+    <Compile Include="obsluga_ui.py" />
     <Compile Include="pompa.py" />
     <Compile Include="rura.py" />
     <Compile Include="sterownik.py" />
