@@ -11,7 +11,7 @@ from obsluga_ui import ObslugaUI
 class SymulacjaProcesu(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Symulacja Procesu - MVC Pattern")
+        self.setWindowTitle("Symulacja Procesu")
         self.setFixedSize(1100, 750)
         self.setStyleSheet("background-color: #1e1e1e; color: white; font-family: Segoe UI;")
 

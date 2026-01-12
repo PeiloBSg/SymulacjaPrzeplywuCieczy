@@ -3,9 +3,7 @@ from PyQt5.QtCore import Qt
 
 class ObslugaUI:
     def __init__(self, okno_glowne):
-        """
-        :param okno_glowne: Referencja do instancji SymulacjaProcesu (self)
-        """
+
         self.okno = okno_glowne
 
     def init_ui(self):
